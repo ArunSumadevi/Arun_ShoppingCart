@@ -1,0 +1,87 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:context="http://www.springframework.org/schema/context"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:mvc="http://www.springframework.org/schema/mvc"
+ xmlns:webflow="http://www.springframework.org/schema/webflow-config"
+ xsi:schemaLocation="
+ http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context-4.0.xsd
+ http://www.springframework.org/schema/mvc
+ http://www.springframework.org/schema/mvc/spring-mvc.xsd
+ http://www.springframework.org/schema/webflow-config
+ http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.4.xsd">
+ 
+        
+<context:component-scan base-package="com.aruntech*" />
+
+<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="prefix">
+		<value>/WEB-INF/views/</value>
+ 	</property>
+ 	<property name="suffix">
+    	<value>.jsp</value>
+ 	</property>
+</bean> 
+
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- max upload size in bytes -->
+   <property name="maxUploadSize" value="20971520" /> <!-- 20MB -->
+   <!-- max size of file in memory (in bytes) -->
+   <property name="maxInMemorySize" value="1048576" /> <!-- 1MB -->
+</bean>      
+
+<mvc:resources mapping="/Resources/**" location="/Resources/" 	cache-period="31556926"/>
+
+<mvc:annotation-driven />
+
+<mvc:interceptors>
+    <bean id="webContentInterceptor" class="org.springframework.web.servlet.mvc.WebContentInterceptor">
+        <property name="cacheSeconds" value="0"/>
+        <property name="useExpiresHeader" value="true"/>
+        <property name="useCacheControlHeader" value="true"/>
+        <property name="useCacheControlNoStore" value="true"/>
+    </bean>
+</mvc:interceptors>
+ 
+<webflow:flow-registry id="flowRegistry" flow-builder-services="flowBuilderServices" base-path="/WEB-INF">
+    <webflow:flow-location id="user_cart_checkout" path="/checkout.xml" />
+</webflow:flow-registry>
+
+<bean id="viewFactoryCreator" class="org.springframework.webflow.mvc.builder.MvcViewFactoryCreator">
+	<property name="viewResolvers">
+		<list>
+			<ref bean="viewResolver" />
+		</list>
+	</property>
+</bean>
+	
+<webflow:flow-builder-services id="flowBuilderServices" view-factory-creator="viewFactoryCreator" />
+
+<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerAdapter">
+	<property name="flowExecutor" ref="flowExecutor" />
+</bean>
+
+<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping">
+	<property name="flowRegistry" ref="flowRegistry" />
+	<property name="order" value="0"/>
+</bean>
+
+<webflow:flow-executor id="flowExecutor" />
+
+<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+	<property name="host" value="smtp.gmail.com" />
+    <property name="port" value="587" />
+    <property name="username" value="ebaazar.resetpass@gmail.com" />
+    <property name="password" value="ebaazarmatr1x" />
+    <property name="javaMailProperties">
+    	<props>
+	        <prop key="mail.transport.protocol">smtp</prop>
+	        <prop key="mail.smtp.auth">true</prop>
+	        <prop key="mail.smtp.starttls.enable">true</prop>
+        </props>
+    </property>
+</bean>
+
+</beans>
